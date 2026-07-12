@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>journal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Instrument+Serif:ital@0;1&family=Caveat:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="theme.css">
+</head>
+<body>
+<div class="container">
+
+  <div class="top-nav">
+    <a href="index.html" data-internal>← home</a>
+  </div>
+
+  <div id="themeSwitch"></div>
+
+  <h1>journal</h1>
+  <p class="lede">write whatever's on your mind, no prompts needed</p>
+
+  <div class="board">
+
+    <div class="panel pinned tilt-b">
+      <textarea id="entryText" rows="6" placeholder="start writing..."></textarea>
+      <br><br>
+      <button class="btn" id="saveEntryBtn">save entry</button>
+    </div>
+
+    <p class="lede" style="margin: 26px 0 12px;">your entries</p>
+    <!-- each saved entry becomes its own pinned .note-card, see
+         renderEntries() below -->
+    <div id="entryList"></div>
+  </div>
+
+</div>
+
+<script src="theme.js"></script>
+<script>
+/* ================================================================
+   STATE
+   `entries` lives only in memory for this browser tab/session --
+   same tradeoff as the mood tracker page. See the comment in
+   mood-tracker.html (and the note at the top of theme.js) for why:
+   this site is meant to run standalone from local files, and the
+   Claude preview sandbox specifically doesn't support persistent
+   browser storage. If/when you host this yourself, swapping
+   `entries` to read/write localStorage is a small change (see the
+   TIP comment near saveEntry() below).
+   ================================================================ */
+  let entries = [];
+
+  function saveEntry(){
+    const textEl = document.getElementById('entryText');
+    const text = textEl.value.trim();
+    if (!text) return; // don't save empty entries
+
+    entries.unshift({
+      text: text,
+      date: new Date().toLocaleString([], {
+        month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+      })
+    });
+
+    /* TIP for later, once you're hosting this outside of Claude's
+       preview: you could persist entries across visits like this --
+         localStorage.setItem('journalEntries', JSON.stringify(entries));
+       and load them back on page start with:
+         entries = JSON.parse(localStorage.getItem('journalEntries') || '[]');
+    */
+
+    textEl.value = '';
+    renderEntries();
+  }
+
+  function renderEntries(){
+    const el = document.getElementById('entryList');
+    if (entries.length === 0){
+      el.innerHTML = `<p class="empty-note">no entries yet -- start writing above</p>`;
+      return;
+    }
+    el.innerHTML = entries.map((e, i) => `
+      <div class="note-card pinned ${i % 2 === 0 ? 'tilt-c' : 'tilt-d'}">
+        <p class="entry-meta">${e.date}</p>
+        <p class="entry-text">${e.text}</p>
+      </div>
+    `).join('');
+  }
+
+  document.getElementById('saveEntryBtn').onclick = saveEntry;
+
+  renderEntries();
+</script>
+</body>
+</html>

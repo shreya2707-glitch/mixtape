@@ -1,0 +1,309 @@
+/* ==================================================================
+   THEME.CSS
+   ------------------------------------------------------------------
+   This file is shared by every page (index, mood-tracker, journal,
+   pomodoro). It does two things:
+
+   1. Defines 3 THEMES as sets of CSS custom properties (variables),
+      switched by a `data-theme="..."` attribute on <body>.
+      theme.js is what actually sets that attribute — see theme.js
+      comments for how switching works.
+
+   2. Defines shared, theme-agnostic components (nav bar, buttons,
+      cards, form fields) that are built entirely out of those
+      variables, so they automatically re-skin when the theme
+      changes -- none of the component CSS below ever hardcodes a
+      color, it only ever reads var(--something).
+   ================================================================== */
+
+/* ---- THEME 1: MIDNIGHT (dark, matches the mixtape/cassette pages) ---- */
+body[data-theme="midnight"]{
+  --bg: #0E0C0A;
+  --surface: #17140F;
+  --surface-2: #201B14;
+  --text: #EFE6D0;
+  --text-dim: #9A917F;
+  --accent: #C97B3D;
+  --accent-rgb: 201, 123, 61; /* same color as --accent, split into r,g,b so
+                                  decorative bits can use rgba(var(--accent-rgb), 0.3) */
+  --border: #2A2118;
+}
+
+/* ---- THEME 2: DREAMY (soft pastel, light) ---- */
+body[data-theme="dreamy"]{
+  --bg: #FBF3F8;
+  --surface: #FFFFFF;
+  --surface-2: #F7E9F1;
+  --text: #3B2E39;
+  --text-dim: #8C7A88;
+  --accent: #C77DA6;
+  --accent-rgb: 199, 125, 166;
+  --border: #F0D9E8;
+}
+
+/* ---- THEME 3: FOCUS (minimal, low-distraction, for studying) ---- */
+body[data-theme="focus"]{
+  --bg: #F6F3EC;
+  --surface: #FFFFFF;
+  --surface-2: #ECE7D8;
+  --text: #20201C;
+  --text-dim: #6E6A5F;
+  --accent: #3E6259;
+  --accent-rgb: 62, 98, 89;
+  --border: #E2DDCB;
+}
+
+/* ==================================================================
+   BASE / RESET
+   ================================================================== */
+*{ box-sizing: border-box; }
+
+body{
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Space Mono', monospace;
+  -webkit-font-smoothing: antialiased;
+  transition: background 0.2s ease, color 0.2s ease; /* smooth theme swap */
+}
+
+.container{
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 32px 20px 80px;
+}
+
+h1{
+  font-family: 'Instrument Serif', serif;
+  font-style: italic;
+  font-weight: 400;
+  font-size: 34px;
+  margin: 0 0 6px;
+}
+
+.lede{
+  color: var(--text-dim);
+  font-size: 13px;
+  letter-spacing: 0.03em;
+  margin: 0 0 28px;
+}
+
+/* ==================================================================
+   THEME SWITCHER
+   theme.js looks for an element with id="themeSwitch" and fills it
+   with one button per theme -- these are the button styles.
+   ================================================================== */
+.theme-switch{
+  display: flex;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+.theme-btn{
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  padding: 7px 14px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-dim);
+  cursor: pointer;
+}
+.theme-btn.active{
+  background: var(--accent);
+  color: var(--bg);
+  border-color: var(--accent);
+  font-weight: 700;
+}
+
+/* ==================================================================
+   NAV BAR (small "back to home" link used on every inner page)
+   ================================================================== */
+.top-nav{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+.top-nav a{
+  color: var(--text-dim);
+  text-decoration: none;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+}
+.top-nav a:hover{ color: var(--accent); }
+
+/* ==================================================================
+   HUB CARDS (the big buttons on index.html that link to each tool)
+   ================================================================== */
+.card-grid{
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+@media (max-width: 560px){
+  .card-grid{ grid-template-columns: 1fr; }
+}
+
+.card{
+  display: block;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+  text-decoration: none;
+  color: var(--text);
+  transition: transform 0.12s ease, border-color 0.12s ease;
+}
+.card:hover{
+  border-color: var(--accent);
+  transform: translateY(-2px);
+}
+.card .card-icon{ font-size: 22px; margin-bottom: 8px; display:block; }
+.card .card-title{
+  font-family: 'Instrument Serif', serif;
+  font-size: 20px;
+  margin: 0 0 4px;
+}
+.card .card-desc{
+  font-size: 12px;
+  color: var(--text-dim);
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* ==================================================================
+   SHARED FORM / BUTTON ELEMENTS (used by mood tracker + journal)
+   ================================================================== */
+.panel{
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+textarea, input[type="text"]{
+  width: 100%;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  font-family: 'Space Mono', monospace;
+  font-size: 13px;
+  padding: 10px 12px;
+  resize: vertical;
+}
+
+.btn{
+  font-family: 'Space Mono', monospace;
+  font-size: 12px;
+  letter-spacing: 0.05em;
+  padding: 10px 18px;
+  border-radius: 8px;
+  border: 1px solid var(--accent);
+  background: var(--accent);
+  color: var(--bg);
+  cursor: pointer;
+  font-weight: 700;
+}
+.btn.secondary{
+  background: transparent;
+  color: var(--text);
+  border-color: var(--border);
+  font-weight: 400;
+}
+
+.entry{
+  border-top: 1px dashed var(--border);
+  padding: 12px 0;
+}
+.entry:first-child{ border-top: none; }
+.entry-meta{
+  font-size: 11px;
+  color: var(--text-dim);
+  margin: 0 0 4px;
+}
+.entry-text{
+  font-family: 'Instrument Serif', serif;
+  font-size: 16px;
+  margin: 0;
+}
+
+.empty-note{
+  font-family: 'Caveat', cursive;
+  font-size: 18px;
+  color: var(--text-dim);
+}
+
+/* ==================================================================
+   CORKBOARD DECORATIONS
+   ------------------------------------------------------------------
+   These are the same visual pieces the homepage introduced, pulled
+   in here so every page can reuse them instead of each page
+   reinventing its own "pinned to a board" look.
+
+   - .board       : the dotted corkboard background + border wrapper
+   - .tilt-a/b/c/d: four slightly different rotation amounts, so
+                    things pinned to the board don't look robotically
+                    aligned
+   - .pinned      : adds the little diagonal-striped "washi tape"
+                    strip across the top of whatever it's applied to
+   - .note-card   : a small tilted, taped card -- used for individual
+                    list items (a logged mood, a journal entry) so
+                    they read as separate pinned notes rather than
+                    one long plain list
+   ================================================================== */
+.board{
+  background-image: radial-gradient(rgba(var(--accent-rgb), 0.16) 1px, transparent 1px);
+  background-size: 18px 18px;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 32px 22px 40px;
+}
+
+.tilt-a{ transform: rotate(-2.5deg); }
+.tilt-b{ transform: rotate(1.8deg); }
+.tilt-c{ transform: rotate(-1.2deg); }
+.tilt-d{ transform: rotate(2.4deg); }
+
+/* hovering/focusing a pinned, clickable element straightens it out
+   and lifts it slightly -- purely decorative, skipped entirely for
+   people who've asked their OS/browser to reduce motion */
+@media (prefers-reduced-motion: no-preference){
+  a.pinned:hover, a.pinned:focus{
+    transform: rotate(0deg) translateY(-4px) !important;
+  }
+}
+.pinned{
+  position: relative;
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+.pinned::before{
+  content: '';
+  position: absolute;
+  top: -10px;
+  left: 50%;
+  width: 44px;
+  height: 16px;
+  margin-left: -22px;
+  background: repeating-linear-gradient(
+    45deg,
+    rgba(var(--accent-rgb), 0.55),
+    rgba(var(--accent-rgb), 0.55) 4px,
+    rgba(var(--accent-rgb), 0.3) 4px,
+    rgba(var(--accent-rgb), 0.3) 8px
+  );
+  border-radius: 2px;
+  transform: rotate(-4deg);
+  opacity: 0.9;
+}
+
+.note-card{
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px 16px;
+  margin: 0 0 18px;
+  box-shadow: 0 6px 14px rgba(0,0,0,0.12);
+}

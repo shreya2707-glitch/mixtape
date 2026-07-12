@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>study / pomodoro</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Instrument+Serif:ital@0;1&family=Caveat:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="theme.css">
+<style>
+  /* page-specific styles for the big timer display */
+  .timer-display{
+    text-align: center;
+    padding: 30px 0 10px;
+  }
+  .phase-label{
+    font-size: 12px;
+    letter-spacing: 0.2em;
+    color: var(--text-dim);
+    margin: 0 0 8px;
+  }
+  .time{
+    font-family: 'Instrument Serif', serif;
+    font-style: italic;
+    font-size: 64px;
+    margin: 0;
+  }
+  .cycle-dots{
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    margin: 12px 0 20px;
+  }
+  .cycle-dots span{
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--border);
+    display: inline-block;
+  }
+  .cycle-dots span.done{ background: var(--accent); }
+
+  .timer-controls{
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+
+  .settings-row{
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-top: 16px;
+  }
+  .settings-row input{
+    width: 50px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    font-family: 'Space Mono', monospace;
+    padding: 4px 6px;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="top-nav">
+    <a href="index.html" data-internal>← home</a>
+  </div>
+
+  <div id="themeSwitch"></div>
+
+  <h1>study / pomodoro</h1>
+  <p class="lede">focus in short bursts, with real breaks in between</p>
+
+  <div class="board">
+
+  <div class="panel pinned tilt-a">
+    <div class="timer-display">
+      <p class="phase-label" id="phaseLabel">FOCUS</p>
+      <p class="time" id="timeDisplay">25:00</p>
+      <div class="cycle-dots" id="cycleDots"></div>
+    </div>
+
+    <div class="timer-controls">
+      <button class="btn" id="startPauseBtn">start</button>
+      <button class="btn secondary" id="resetBtn">reset</button>
+    </div>
+
+    <!-- lets you set your own focus/break lengths instead of the
+         default 25 / 5. changes apply the next time the timer
+         resets (so it doesn't yank the countdown mid-session) -->
+    <div class="settings-row">
+      focus <input type="text" id="focusMins" value="25"> min
+      &nbsp;·&nbsp;
+      break <input type="text" id="breakMins" value="5"> min
+    </div>
+  </div>
+
+  <!-- ============================================================
+       BACKGROUND MUSIC SLOT
+       This is where your slowed + reverb track goes. Two ways to
+       hook it up, both shown below:
+
+       OPTION A (simplest) -- put an mp3 file named "study-music.mp3"
+       in this same folder as this HTML file, and the <audio> tag
+       below will just work as-is via its src attribute.
+
+       OPTION B -- if your file has a different name/location,
+       either edit the src="..." path below directly, or use the
+       "choose file" picker, which loads any audio file from your
+       computer for this session (no renaming needed, nothing gets
+       uploaded anywhere -- it all stays local in your browser).
+       ============================================================ -->
+  <div class="panel pinned tilt-c">
+    <p class="lede" style="margin-bottom:12px;">background music</p>
+
+    <!-- OPTION A: point this at your own file -->
+    <audio id="bgMusic" src="study-music.mp3" loop></audio>
+
+    <div class="timer-controls" style="margin-bottom:10px;">
+      <button class="btn secondary" id="musicToggleBtn">▶ play music</button>
+    </div>
+
+    <!-- OPTION B: pick a file straight from your computer -->
+    <input type="file" id="musicPicker" accept="audio/*">
+  </div>
+
+  </div> <!-- /.board -->
+</div>
+
+<script src="theme.js"></script>
+<script>
+/* ================================================================
+   SETTINGS + STATE
+   ----------------------------------------------------------------
+   focusSeconds / breakSeconds: how long each phase lasts, read from
+   the two input boxes (converted from minutes to seconds).
+
+   phase: 'focus' or 'break' -- which countdown is currently running.
+   secondsLeft: the live countdown value.
+   cyclesCompleted: how many focus sessions finished (drives the dots).
+   isRunning: whether setInterval is currently ticking.
+   ================================================================ */
+  let focusSeconds = 25 * 60;
+  let breakSeconds = 5 * 60;
+  let phase = 'focus';
+  let secondsLeft = focusSeconds;
+  let cyclesCompleted = 0;
+  const TOTAL_CYCLES_SHOWN = 4; // how many dots to draw
+  let isRunning = false;
+  let intervalHandle = null;
+
+/* ================================================================
+   DISPLAY HELPERS
+   ================================================================ */
+  function formatTime(totalSeconds){
+    const m = String(Math.floor(totalSeconds / 60)).padStart(2, '0');
+    const s = String(totalSeconds % 60).padStart(2, '0');
+    return `${m}:${s}`;
+  }
+
+  function renderTimer(){
+    document.getElementById('timeDisplay').textContent = formatTime(secondsLeft);
+    document.getElementById('phaseLabel').textContent = phase === 'focus' ? 'FOCUS' : 'BREAK';
+  }
+
+  function renderDots(){
+    const el = document.getElementById('cycleDots');
+    el.innerHTML = '';
+    for (let i = 0; i < TOTAL_CYCLES_SHOWN; i++){
+      const dot = document.createElement('span');
+      // dots fill in based on cyclesCompleted, wrapping every 4
+      if (i < (cyclesCompleted % TOTAL_CYCLES_SHOWN)) dot.classList.add('done');
+      el.appendChild(dot);
+    }
+  }
+
+/* ================================================================
+   TIMER TICK
+   Runs once per second while isRunning is true. When secondsLeft
+   hits 0, it flips the phase (focus <-> break) and starts the next
+   countdown automatically -- that's what makes it a real pomodoro
+   cycle instead of just a single countdown.
+   ================================================================ */
+  function tick(){
+    secondsLeft--;
+    if (secondsLeft <= 0){
+      if (phase === 'focus'){
+        cyclesCompleted++;
+        phase = 'break';
+        secondsLeft = breakSeconds;
+      } else {
+        phase = 'focus';
+        secondsLeft = focusSeconds;
+      }
+      renderDots();
+      // small audible cue between phases using the Web Audio API --
+      // no external sound file needed for this short beep
+      playBeep();
+    }
+    renderTimer();
+  }
+
+  function playBeep(){
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    osc.type = 'sine';
+    osc.frequency.value = 880;
+    osc.connect(ctx.destination);
+    osc.start();
+    osc.stop(ctx.currentTime + 0.25); // quarter-second beep
+  }
+
+/* ================================================================
+   START / PAUSE / RESET
+   ================================================================ */
+  function startPause(){
+    isRunning = !isRunning;
+    document.getElementById('startPauseBtn').textContent = isRunning ? 'pause' : 'start';
+
+    if (isRunning){
+      intervalHandle = setInterval(tick, 1000);
+    } else {
+      clearInterval(intervalHandle);
+    }
+  }
+
+  function resetTimer(){
+    isRunning = false;
+    clearInterval(intervalHandle);
+    document.getElementById('startPauseBtn').textContent = 'start';
+
+    // pick up whatever the user typed into the focus/break inputs
+    const focusInput = parseInt(document.getElementById('focusMins').value, 10);
+    const breakInput = parseInt(document.getElementById('breakMins').value, 10);
+    focusSeconds = (isNaN(focusInput) ? 25 : focusInput) * 60;
+    breakSeconds = (isNaN(breakInput) ? 5 : breakInput) * 60;
+
+    phase = 'focus';
+    secondsLeft = focusSeconds;
+    cyclesCompleted = 0;
+
+    renderTimer();
+    renderDots();
+  }
+
+  document.getElementById('startPauseBtn').onclick = startPause;
+  document.getElementById('resetBtn').onclick = resetTimer;
+
+/* ================================================================
+   BACKGROUND MUSIC CONTROLS
+   ================================================================ */
+  const bgMusic = document.getElementById('bgMusic');
+  const musicToggleBtn = document.getElementById('musicToggleBtn');
+
+  musicToggleBtn.onclick = () => {
+    if (bgMusic.paused){
+      bgMusic.play().catch(() => {
+        // fires if study-music.mp3 doesn't exist yet -- not an error
+        // in your code, just means the file hasn't been added
+        alert("couldn't play study-music.mp3 -- add your track to this folder, or use the file picker below.");
+      });
+      musicToggleBtn.textContent = '❚❚ pause music';
+    } else {
+      bgMusic.pause();
+      musicToggleBtn.textContent = '▶ play music';
+    }
+  };
+
+  // OPTION B: load any local audio file the user picks, entirely
+  // in-browser via a temporary object URL (nothing is uploaded)
+  document.getElementById('musicPicker').onchange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    bgMusic.src = URL.createObjectURL(file);
+    bgMusic.play();
+    musicToggleBtn.textContent = '❚❚ pause music';
+  };
+
+  renderTimer();
+  renderDots();
+</script>
+</body>
+</html>
