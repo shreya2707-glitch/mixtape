@@ -1,190 +1,50 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>your space</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Instrument+Serif:ital@0;1&family=Caveat:wght@500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="theme.css">
-
-<style>
-  /* ================================================================
-     HOMEPAGE-ONLY STYLES
-     ------------------------------------------------------------------
-     Everything generic (colors, the theme switch buttons, container
-     width) still comes from theme.css. Everything below is specific
-     to THIS page's "corkboard" look: cards pinned at slight angles,
-     like physical objects taped to a board, rather than a plain
-     uniform grid. It all still reads var(--accent) etc, so it
-     re-skins correctly when you switch themes.
-     ================================================================ */
-
-  /* .board / .tilt-a../d / .pinned now live in theme.css so every
-     page can share them -- this file only keeps styles unique to
-     the homepage's card layout below */
-
-  .greeting-row{
-    text-align: center;
-    margin-bottom: 30px;
-  }
-  .greeting{
-    font-family: 'Caveat', cursive;
-    font-size: 22px;
-    color: var(--accent);
-    margin: 0 0 2px;
-  }
-  h1{ text-align: center; }
-  .lede{ text-align: center; }
-
-  /* ---- pinned card grid: 2 columns, cards individually rotated ---- */
-  .pin-grid{
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 28px 22px;
-    margin-top: 34px;
-  }
-  @media (max-width: 560px){
-    .pin-grid{ grid-template-columns: 1fr; }
-  }
-
-  /* the card's own look (surface/border/shadow); the tape strip and
-     tilt/hover behavior come from the shared .pinned + .tilt-x
-     classes in theme.css -- this page just adds them in the HTML
-     below (class="pin-card pinned tilt-a") */
-  .pin-card{
-    display: block;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 22px 18px 18px;
-    text-decoration: none;
-    color: var(--text);
-    box-shadow: 0 10px 24px rgba(0,0,0,0.18);
-  }
-  .pin-card:hover, .pin-card:focus{
-    box-shadow: 0 16px 30px rgba(0,0,0,0.24);
-  }
-
-  .pin-stamp{
-    font-size: 10px;
-    letter-spacing: 0.18em;
-    color: var(--text-dim);
-    margin: 0 0 10px;
-  }
-  .pin-icon{ font-size: 26px; display: block; margin-bottom: 6px; }
-  .pin-title{
-    font-family: 'Instrument Serif', serif;
-    font-style: italic;
-    font-size: 22px;
-    margin: 0 0 4px;
-  }
-  .pin-desc{
-    font-size: 12px;
-    color: var(--text-dim);
-    line-height: 1.5;
-    margin: 0;
-  }
-
-  .board-note{
-    text-align: center;
-    font-family: 'Caveat', cursive;
-    font-size: 17px;
-    color: var(--text-dim);
-    margin-top: 30px;
-  }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Studio Hub</title>
+  <link rel="stylesheet" href="theme.css">
 </head>
 <body>
-<div class="container">
+  <div class="studio-layout">
+    <aside class="left-deck-panel" id="deckPanel">
+      <div>
+        <h3>Vault Deck</h3>
+        <p class="subtext">Click tape deck structure to advance tracks manually.</p>
+        <div class="cassette-shell">
+          <div class="cassette-label" id="currentTrackLabel">SIDE A: MIDNIGHT DRIFT</div>
+          <div class="reels-container">
+            <svg class="reel" width="65" height="65" viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="none" stroke="var(--accent-amber)" stroke-width="5"/><circle cx="50" cy="50" r="18" fill="none" stroke="var(--accent-amber)" stroke-width="3" stroke-dasharray="12 6"/></svg>
+            <svg class="reel" width="65" height="65" viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="none" stroke="var(--accent-amber)" stroke-width="5"/><circle cx="50" cy="50" r="18" fill="none" stroke="var(--accent-amber)" stroke-width="3" stroke-dasharray="12 6"/></svg>
+          </div>
+        </div>
+        <div class="now-playing-banner"><div class="pulse-dot"></div><span>Session Audio Grid Sync</span></div>
+      </div>
+      <button class="btn-action" id="globalPlayBtn" style="width: 100%;">Engage Master Drive</button>
+    </aside>
 
-  <div id="themeSwitch"></div>
-
-  <!-- ================================================================
-       GREETING
-       Filled in by JS below based on the visitor's local clock, so
-       "good morning" / "good afternoon" / "good evening" actually
-       matches when they open the page -- a small touch that makes
-       the homepage feel a little alive rather than static.
-       ================================================================ -->
-  <div class="greeting-row">
-    <p class="greeting" id="greeting">hey, welcome back</p>
-    <h1>your space</h1>
-    <p class="lede">everything's pinned up below -- pick what you need</p>
+    <main class="right-canvas-panel">
+      <nav class="studio-nav">
+        <a href="index.html" class="nav-btn active">Hub</a>
+        <a href="mixtape-builder.html" class="nav-btn">Mixtape</a>
+        <a href="mood-tracker.html" class="nav-btn">Moods</a>
+        <a href="constellation.html" class="nav-btn">Constellations</a>
+        <a href="journal.html" class="nav-btn">Journal</a>
+        <a href="pomodoro.html" class="nav-btn">Pomodoro</a>
+        <a href="release.html" class="nav-btn">Release</a>
+        <a href="time-capsule.html" class="nav-btn">Capsule</a>
+      </nav>
+      <div class="canvas-content">
+        <h1>Midnight Ambient Workspace</h1>
+        <p>A beautiful multipage system designed to process creative inputs across isolated modules, locked inside a deep, non-glare amber workflow environment.</p>
+        <div class="card">
+          <h3>Ecosystem Architecture</h3>
+          <p>Select any tool from the upper deck dashboard menu. The persistent analog cassette core deck running inside the left workspace tracks states cohesively via localStorage logic frameworks.</p>
+        </div>
+      </div>
+    </main>
   </div>
-
-  <!-- ================================================================
-       THE BOARD
-       Each tool is a "pinned" card: a washi-tape strip (::before in
-       the CSS above) plus a slight rotation class (tilt-a/b/c/d) so
-       the four cards don't look like a robotic grid. Hovering
-       straightens the card out, like picking it up off the board.
-       ================================================================ -->
-  <div class="board">
-    <div class="pin-grid">
-
-      <a class="pin-card pinned tilt-a" href="mood-tracker.html" data-internal>
-        <p class="pin-stamp">TAB · 01</p>
-        <span class="pin-icon">◐</span>
-        <p class="pin-title">mood tracker</p>
-        <p class="pin-desc">log how you're feeling, whenever you feel like it</p>
-      </a>
-
-      <a class="pin-card pinned tilt-b" href="journal.html" data-internal>
-        <p class="pin-stamp">ENTRY · 02</p>
-        <span class="pin-icon">✎</span>
-        <p class="pin-title">journal</p>
-        <p class="pin-desc">write it out, no structure required</p>
-      </a>
-
-      <a class="pin-card pinned tilt-c" href="pomodoro.html" data-internal>
-        <p class="pin-stamp">TIMER · 03</p>
-        <span class="pin-icon">◷</span>
-        <p class="pin-title">study / pomodoro</p>
-        <p class="pin-desc">focus timer with work + break cycles</p>
-      </a>
-
-      <a class="pin-card pinned tilt-d" href="mixtape-builder.html" data-internal>
-        <p class="pin-stamp">SIDE A · 04</p>
-        <span class="pin-icon">♪</span>
-        <p class="pin-title">mixtape</p>
-        <p class="pin-desc">build a playlist on your cassette</p>
-      </a>
-
-    </div>
-
-    <p class="board-note">psst -- try switching the theme up top too</p>
-  </div>
-
-</div>
-
-<!-- theme.js must load before our own script below, since our script
-     doesn't redefine theme logic -- it only adds the greeting -->
-<script src="theme.js"></script>
-<script>
-/* ================================================================
-   TIME-OF-DAY GREETING
-   ----------------------------------------------------------------
-   Simple: check the visitor's local hour (0-23) via `new Date()`
-   and pick a matching phrase. This runs once, right when the page
-   loads, and writes straight into the <p id="greeting"> element
-   declared above.
-   ================================================================ */
-  function renderGreeting(){
-    const hour = new Date().getHours();
-    let text;
-
-    if (hour < 5)       text = "still up? okay, midnight it is";
-    else if (hour < 12)  text = "good morning";
-    else if (hour < 17)  text = "good afternoon";
-    else if (hour < 21)  text = "good evening";
-    else                 text = "winding down for the night";
-
-    document.getElementById('greeting').textContent = text;
-  }
-
-  renderGreeting();
-</script>
+  <script src="studio.js"></script>
 </body>
 </html>
