@@ -1,176 +1,69 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>mood tracker</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Instrument+Serif:ital@0;1&family=Caveat:wght@500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="theme.css">
-<style>
-  /* page-specific styles that don't belong in the shared theme.css
-     because only this page uses them */
-  .mood-picker{
-    display: flex;
-    gap: 10px;
-    margin-bottom: 14px;
-    flex-wrap: wrap;
-  }
-  .mood-btn{
-    font-size: 26px;
-    background: var(--surface-2);
-    border: 2px solid transparent;
-    border-radius: 10px;
-    width: 52px;
-    height: 52px;
-    cursor: pointer;
-  }
-  .mood-btn.selected{
-    border-color: var(--accent);
-  }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mood Tracker</title>
+  <link rel="stylesheet" href="theme.css">
+  <style>
+    .mood-selector-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 2rem; }
+    .mood-node { background: rgba(0,0,0,0.3); border: 1px solid var(--border-smoke); padding: 1.5rem; text-align: center; border-radius: 8px; cursor: pointer; transition: all 0.3s; }
+    .mood-node:hover { border-color: var(--accent-amber); transform: translateY(-2px); }
+  </style>
 </head>
 <body>
-<div class="container">
-
-  <div class="top-nav">
-    <a href="index.html" data-internal>← home</a>
-  </div>
-
-  <div id="themeSwitch"></div>
-
-  <h1>mood tracker</h1>
-  <p class="lede">how are you doing right now?</p>
-
-  <!-- .board gives the same dotted corkboard background used on the
-       homepage, so this page still feels like part of the same site
-       rather than a plain separate form -->
-  <div class="board">
-
-    <!-- .panel.pinned.tilt-c: the ordinary .panel look from
-         theme.css, PLUS the washi-tape strip and a slight rotation
-         from the shared corkboard classes -->
-    <div class="panel pinned tilt-c">
-      <!-- ============================================================
-           MOOD PICKER
-           Built from the MOODS array below rather than hard-coded
-           buttons, so adding a new mood later = one more array entry.
-           Clicking a button stores its value in `selectedMood` and
-           gives it the "selected" outline via the .selected class.
-           ============================================================ -->
-      <div class="mood-picker" id="moodPicker"></div>
-
-      <textarea id="moodNote" rows="3" placeholder="add a quick note (optional)..."></textarea>
-      <br><br>
-      <button class="btn" id="logMoodBtn">log this mood</button>
-    </div>
-
-    <p class="lede" style="margin: 26px 0 12px;">today's log</p>
-    <!-- each logged mood is rendered as its own small pinned
-         .note-card (see renderEntries() below) rather than one long
-         plain list, so the log reads like a little stack of notes -->
-    <div id="moodEntries"></div>
-  </div>
-
-</div>
-
-<script src="theme.js"></script>
-<script>
-/* ================================================================
-   DATA + STATE
-   ----------------------------------------------------------------
-   MOODS: the list of emoji + label pairs shown as buttons.
-   entries: every mood logged THIS SESSION. It's a plain in-memory
-   array, not saved to a file or database -- refreshing the page
-   clears it. That's a deliberate limitation of running purely
-   inside the browser with no backend (see note further down about
-   why we don't use localStorage here either).
-   ================================================================ */
-  const MOODS = [
-    { emoji: '😊', label: 'good' },
-    { emoji: '😌', label: 'calm' },
-    { emoji: '😐', label: 'okay' },
-    { emoji: '😔', label: 'low' },
-    { emoji: '😣', label: 'stressed' },
-    { emoji: '😴', label: 'tired' }
-  ];
-
-  let selectedMood = null;
-  let entries = [];
-
-/* ================================================================
-   RENDER: MOOD PICKER
-   Draws one button per entry in MOODS. Clicking a button just sets
-   selectedMood and re-runs this function so the "selected" ring
-   moves to the newly clicked one.
-   ================================================================ */
-  function renderMoodPicker(){
-    const el = document.getElementById('moodPicker');
-    el.innerHTML = '';
-    MOODS.forEach(m => {
-      const btn = document.createElement('button');
-      btn.className = 'mood-btn' + (selectedMood === m.label ? ' selected' : '');
-      btn.textContent = m.emoji;
-      btn.title = m.label;
-      btn.onclick = () => {
-        selectedMood = m.label;
-        renderMoodPicker();
-      };
-      el.appendChild(btn);
-    });
-  }
-
-/* ================================================================
-   LOGGING AN ENTRY
-   Reads the currently selected mood + whatever's in the textarea,
-   pushes a new entry object (with a timestamp) onto `entries`, then
-   clears the form and re-renders the log below.
-   ================================================================ */
-  document.getElementById('logMoodBtn').onclick = () => {
-    if (!selectedMood){
-      alert('pick a mood first!');
-      return;
-    }
-    const noteEl = document.getElementById('moodNote');
-    entries.unshift({
-      mood: selectedMood,
-      emoji: MOODS.find(m => m.label === selectedMood).emoji,
-      note: noteEl.value.trim(),
-      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-    });
-
-    // reset the form for the next entry
-    selectedMood = null;
-    noteEl.value = '';
-    renderMoodPicker();
-    renderEntries();
-  };
-
-/* ================================================================
-   RENDER: ENTRY LIST
-   Shows every logged mood, newest first (we used unshift() above
-   so index 0 is always the latest).
-   ================================================================ */
-  function renderEntries(){
-    const el = document.getElementById('moodEntries');
-    if (entries.length === 0){
-      el.innerHTML = `<p class="empty-note">nothing logged yet today</p>`;
-      return;
-    }
-    // alternate tilt-a / tilt-b per row (using the loop index, i) so
-    // consecutive notes lean in different directions instead of all
-    // tilting the same way
-    el.innerHTML = entries.map((e, i) => `
-      <div class="note-card pinned ${i % 2 === 0 ? 'tilt-a' : 'tilt-b'}">
-        <p class="entry-meta">${e.time}</p>
-        <p class="entry-text">${e.emoji} ${e.mood}${e.note ? ' — ' + e.note : ''}</p>
+  <div class="studio-layout">
+    <aside class="left-deck-panel" id="deckPanel">
+      <div>
+        <h3>Vault Deck</h3>
+        <p class="subtext">Click tape deck structure to advance tracks manually.</p>
+        <div class="cassette-shell">
+          <div class="cassette-label" id="currentTrackLabel">SIDE A: MIDNIGHT DRIFT</div>
+          <div class="reels-container">
+            <svg class="reel" width="65" height="65" viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="none" stroke="var(--accent-amber)" stroke-width="5"/><circle cx="50" cy="50" r="18" fill="none" stroke="var(--accent-amber)" stroke-width="3" stroke-dasharray="12 6"/></svg>
+            <svg class="reel" width="65" height="65" viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="none" stroke="var(--accent-amber)" stroke-width="5"/><circle cx="50" cy="50" r="18" fill="none" stroke="var(--accent-amber)" stroke-width="3" stroke-dasharray="12 6"/></svg>
+          </div>
+        </div>
+        <div class="now-playing-banner"><div class="pulse-dot"></div><span>Session Audio Grid Sync</span></div>
       </div>
-    `).join('');
-  }
+      <button class="btn-action" id="globalPlayBtn" style="width: 100%;">Engage Master Drive</button>
+    </aside>
 
-  renderMoodPicker();
-  renderEntries();
-</script>
+    <main class="right-canvas-panel">
+      <nav class="studio-nav">
+        <a href="index.html" class="nav-btn">Hub</a>
+        <a href="mixtape-builder.html" class="nav-btn">Mixtape</a>
+        <a href="mood-tracker.html" class="nav-btn active">Moods</a>
+        <a href="constellation.html" class="nav-btn">Constellations</a>
+        <a href="journal.html" class="nav-btn">Journal</a>
+        <a href="pomodoro.html" class="nav-btn">Pomodoro</a>
+        <a href="release.html" class="nav-btn">Release</a>
+        <a href="time-capsule.html" class="nav-btn">Capsule</a>
+      </nav>
+      <div class="canvas-content">
+        <h2>Vibe Sync Matrix</h2>
+        <p class="subtext">Logging specific states interactively updates reel kinetic drive velocities.</p>
+        <div class="card">
+          <div class="mood-selector-row">
+            <div class="mood-node" data-speed="2.5">⚡ High Energy</div>
+            <div class="mood-node" data-speed="1.2">☕ Hyper Focus</div>
+            <div class="mood-node" data-speed="0.6">🌌 Dream Space</div>
+            <div class="mood-node" data-speed="0.2">🍂 Melancholy</div>
+          </div>
+          <div id="vibeAlert" style="color:var(--accent-amber); font-size:0.9rem; font-family:monospace;">Select state parameter...</div>
+        </div>
+      </div>
+    </main>
+  </div>
+  <script src="studio.js"></script>
+  <script>
+    document.querySelectorAll(".mood-node").forEach(node => {
+      node.addEventListener("click", () => {
+        const speed = parseFloat(node.getAttribute("data-speed"));
+        updateReelSpeed(speed);
+        document.getElementById("vibeAlert").innerText = `>> Kinetic core spin speed set to ${speed}x axis configuration.`;
+      });
+    });
+  </script>
 </body>
 </html>
