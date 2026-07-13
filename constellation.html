@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Constellation Map</title>
+  <link rel="stylesheet" href="theme.css">
+  <style>
+    .star-canvas { width: 100%; height: 450px; background: radial-gradient(circle at center, #181410 0%, #0E0C0A 100%); border: 1px solid var(--border-smoke); border-radius: 12px; position: relative; cursor: crosshair; overflow: hidden; }
+    .star-node { position: absolute; width: 6px; height: 6px; background: #FFF; border-radius: 50%; box-shadow: 0 0 10px var(--accent-amber), 0 0 20px var(--accent-amber); transform: translate(-50%, -50%); animation: flashStar 2s ease infinite alternate; }
+    @keyframes flashStar { 0% { opacity:0.5; transform: translate(-50%, -50%) scale(0.8); } 100% { opacity:1; transform: translate(-50%, -50%) scale(1.2); } }
+  </style>
+</head>
+<body>
+  <div class="studio-layout">
+    <aside class="left-deck-panel" id="deckPanel">
+      <div>
+        <h3>Vault Deck</h3>
+        <p class="subtext">Click tape deck structure to advance tracks manually.</p>
+        <div class="cassette-shell">
+          <div class="cassette-label" id="currentTrackLabel">SIDE A: MIDNIGHT DRIFT</div>
+          <div class="reels-container">
+            <svg class="reel" width="65" height="65" viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="none" stroke="var(--accent-amber)" stroke-width="5"/><circle cx="50" cy="50" r="18" fill="none" stroke="var(--accent-amber)" stroke-width="3" stroke-dasharray="12 6"/></svg>
+            <svg class="reel" width="65" height="65" viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="none" stroke="var(--accent-amber)" stroke-width="5"/><circle cx="50" cy="50" r="18" fill="none" stroke="var(--accent-amber)" stroke-width="3" stroke-dasharray="12 6"/></svg>
+          </div>
+        </div>
+        <div class="now-playing-banner"><div class="pulse-dot"></div><span>Session Audio Grid Sync</span></div>
+      </div>
+      <button class="btn-action" id="globalPlayBtn" style="width: 100%;">Engage Master Drive</button>
+    </aside>
+
+    <main class="right-canvas-panel">
+      <nav class="studio-nav">
+        <a href="index.html" class="nav-btn">Hub</a>
+        <a href="mixtape-builder.html" class="nav-btn">Mixtape</a>
+        <a href="mood-tracker.html" class="nav-btn">Moods</a>
+        <a href="constellation.html" class="nav-btn active">Constellations</a>
+        <a href="journal.html" class="nav-btn">Journal</a>
+        <a href="pomodoro.html" class="nav-btn">Pomodoro</a>
+        <a href="release.html" class="nav-btn">Release</a>
+        <a href="time-capsule.html" class="nav-btn">Capsule</a>
+      </nav>
+      <div class="canvas-content">
+        <h2>Interactive Celestial Mapping</h2>
+        <p class="subtext">Click anywhere directly inside the spatial vectors below to drop glowing sonic coordinates.</p>
+        <div class="star-canvas" id="canvasBox"></div>
+      </div>
+    </main>
+  </div>
+  <script src="studio.js"></script>
+  <script>
+    document.getElementById("canvasBox").addEventListener("click", (e) => {
+      const bounds = e.currentTarget.getBoundingClientRect();
+      const x = e.clientX - bounds.left;
+      const y = e.clientY - bounds.top;
+
+      const element = document.createElement("div");
+      element.className = "star-node";
+      element.style.left = `${x}px`;
+      element.style.top = `${y}px`;
+
+      e.currentTarget.appendChild(element);
+    });
+  </script>
+</body>
+</html>

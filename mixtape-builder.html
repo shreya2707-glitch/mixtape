@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mixtape Builder</title>
+  <link rel="stylesheet" href="theme.css">
+</head>
+<body>
+  <div class="studio-layout">
+    <aside class="left-deck-panel" id="deckPanel">
+      <div>
+        <h3>Vault Deck</h3>
+        <p class="subtext">Click tape deck structure to advance tracks manually.</p>
+        <div class="cassette-shell">
+          <div class="cassette-label" id="currentTrackLabel">SIDE A: MIDNIGHT DRIFT</div>
+          <div class="reels-container">
+            <svg class="reel" width="65" height="65" viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="none" stroke="var(--accent-amber)" stroke-width="5"/><circle cx="50" cy="50" r="18" fill="none" stroke="var(--accent-amber)" stroke-width="3" stroke-dasharray="12 6"/></svg>
+            <svg class="reel" width="65" height="65" viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="none" stroke="var(--accent-amber)" stroke-width="5"/><circle cx="50" cy="50" r="18" fill="none" stroke="var(--accent-amber)" stroke-width="3" stroke-dasharray="12 6"/></svg>
+          </div>
+        </div>
+        <div class="now-playing-banner"><div class="pulse-dot"></div><span>Session Audio Grid Sync</span></div>
+      </div>
+      <button class="btn-action" id="globalPlayBtn" style="width: 100%;">Engage Master Drive</button>
+    </aside>
+
+    <main class="right-canvas-panel">
+      <nav class="studio-nav">
+        <a href="index.html" class="nav-btn">Hub</a>
+        <a href="mixtape-builder.html" class="nav-btn active">Mixtape</a>
+        <a href="mood-tracker.html" class="nav-btn">Moods</a>
+        <a href="constellation.html" class="nav-btn">Constellations</a>
+        <a href="journal.html" class="nav-btn">Journal</a>
+        <a href="pomodoro.html" class="nav-btn">Pomodoro</a>
+        <a href="release.html" class="nav-btn">Release</a>
+        <a href="time-capsule.html" class="nav-btn">Capsule</a>
+      </nav>
+      <div class="canvas-content">
+        <h2>Mixtape Track Compiler</h2>
+        <p class="subtext">Inject custom data matrices directly into the tape playlist index arrays.</p>
+        <div class="card">
+          <input type="text" id="trackInput" class="input-field" placeholder="Enter Sound Wave Title...">
+          <button class="btn-action" id="buildBtn">Splice Track onto Spool</button>
+          
+          <div style="margin-top:2rem;" id="mixtapeLog"></div>
+        </div>
+      </div>
+    </main>
+  </div>
+  <script src="studio.js"></script>
+  <script>
+    document.getElementById("buildBtn").addEventListener("click", () => {
+      const input = document.getElementById("trackInput");
+      if(input.value.trim() !== "") {
+        const log = document.getElementById("mixtapeLog");
+        log.innerHTML += `<div style='padding:0.6rem; border-left:2px solid var(--accent-amber); margin-bottom:0.5rem; background:rgba(255,255,255,0.02)'>Burned: ${input.value.toUpperCase()} successfully.</div>`;
+        input.value = "";
+      }
+    });
+  </script>
+</body>
+</html>
