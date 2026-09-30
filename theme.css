@@ -228,3 +228,54 @@ p, .subtext {
   0% { opacity: 0.3; transform: scale(1); }
   100% { opacity: 1; transform: scale(1.4); box-shadow: var(--neon-glow); }
 }
+
+
+/* additions.css - load after theme.css */
+
+/* Reels: CSS animation replaces the JS setInterval loop */
+.reel {
+  color: var(--accent-amber);
+  transition: none;
+  animation: spin var(--spin-duration, 3s) linear infinite;
+  animation-play-state: paused;
+}
+.playing .reel { animation-play-state: running; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Player controls */
+#seek { width: 100%; margin: 1.25rem 0 0.75rem; accent-color: var(--accent-amber); }
+.controls { display: flex; gap: 10px; }
+.controls .btn-action { flex: 1; }
+
+/* Scope paragraph styling instead of styling every <p> */
+.canvas-content p { margin-bottom: 1rem; }
+
+/* Tracklist */
+.track-row {
+  display: flex; justify-content: space-between; align-items: center; gap: 12px;
+  padding: 0.6rem 0.75rem; border-left: 2px solid var(--border-smoke);
+  margin-bottom: 0.5rem; background: rgba(255,255,255,0.02);
+}
+.track-row.current { border-left-color: var(--accent-amber); }
+.btn-small {
+  background: transparent; color: var(--text-cream);
+  border: 1px solid var(--border-smoke); border-radius: 6px;
+  padding: 0.3rem 0.7rem; margin-left: 6px; cursor: pointer;
+}
+.btn-small:hover { border-color: var(--accent-amber); }
+
+/* Visible keyboard focus */
+:focus-visible { outline: 2px solid var(--accent-hover); outline-offset: 2px; }
+#view:focus { outline: none; }
+
+/* Mobile: stack the deck above the content */
+@media (max-width: 800px) {
+  body { overflow: auto; }
+  .studio-layout { flex-direction: column; height: auto; min-height: 100dvh; }
+  .left-deck-panel { width: 100%; border-right: none; border-bottom: 1px solid var(--border-smoke); padding: 1rem; }
+  .canvas-content { padding: 1.25rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reel, .pulse-dot { animation: none !important; }
+}
